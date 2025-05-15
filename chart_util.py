@@ -5,16 +5,17 @@ from openai import OpenAI
 import log_util
 
 class ChartUtil:
-    def __init__(self):
+    def __init__(self, user_prompt=""):
         load_dotenv()
         self.log = log_util.LogUtil()
         self.client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-        self.chart_out_path = "./chart.png"
+        self.chart_out_path = "./static/chart.png"
+        self.user_prompt=user_prompt
 
     def generate_chart(self, message):
         # Prepare the prompt
-        ci_prompt = f"Please generate a chart using following data: \n {message}"  
-
+        ci_prompt = f"Please generate a chart using following data: \n {message} \n Never use the field doc_count in your analysis. This data has been generated with this user query {self.user_prompt}. You need to use it to graph the correct metrics if there is many"  
+        print(f"Prompt to generate graph {ci_prompt}")
         try:
             # Create a thread and run the assistant
             thread = self.client.beta.threads.create(

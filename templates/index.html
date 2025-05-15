@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query UI</title>
+    <style>
+        /* Loader style */
+        #loader {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+≠
+        #chart {
+        max-width: 100%; /* Allow the image to scale up to the container's width */
+        height: auto;    /* Maintain aspect ratio */
+        display: block;  /* Center the image if needed */
+        margin: 0 auto;  /* Optional: Center the image horizontally */
+    }
+
+        /* Set a global font size */
+        body {
+        font-size: 18px; /* Adjust this value to your preference (e.g., 18px or 1.2em) */
+        line-height: 1.6; /* Improve readability with proper line spacing */
+    }
+
+    /* Optional: Adjust headings for proportional sizing */
+    h1 {
+        font-size: 2.5em;
+    }
+
+    h2 {
+        font-size: 2em;
+    }
+
+    p, label, button, textarea {
+        font-size: 1.2em; /* Ensure form elements are legible */
+    }
+
+        /* Container for form and table */
+        .form-container {
+        display: flex;         /* Use flexbox for layout */
+        align-items: flex-start; /* Align items at the top */
+        gap: 20px;            /* Add space between the textarea and the table */
+    }
+
+    /* Styling for the textarea */
+    #user_query {
+        flex: 1;              /* Allow textarea to take up available space */
+        width: 100%;          /* Ensure the textarea width is responsive */
+        min-width: 300px;     /* Set a minimum width */
+        height: 200px;        /* Set a consistent height */
+    }
+
+    /* Table styling */
+    #fieldsContainer {
+        flex: 0 0 300px;      /* Fix the table width */
+        max-height: 300px;    /* Limit the height */
+        overflow-y: auto;     /* Add vertical scroll for long lists */
+    }
+
+    #fieldsTable {
+        width: 100%;          /* Make the table take up the container's width */
+        border-collapse: collapse;
+    }
+
+    #fieldsTable th, #fieldsTable td {
+        border: 1px solid #ccc; /* Add borders for table cells */
+        padding: 8px;           /* Add padding inside cells */
+        text-align: left;
+    }
+
+    #fieldsTable th {
+        background-color: #f2f2f2; /* Add a background color to the header */
+    }
+    </style>
+</head>
+<body>
+    <h1>NETSCOUT LLM</h1>
+    <label for="indexSelector">Choose an AIS Playbook:</label>
+    <select id="indexSelector" name="indexSelector">
+        <option value="" disabled selected>Select an index</option>
+        {% for index in index_list %}
+            <option value="{{ index.value }}">{{ index.key }}</option>
+        {% endfor %}
+    </select>
+    <!-- Updated HTML -->
+    <div class="form-container">
+    <!-- Query Form -->
+        <form id="queryForm">
+            <label for="user_query">Enter your query:</label><br>
+            <textarea id="user_query" name="user_query" rows="4" cols="50" required></textarea><br><br>
+            <button type="submit">Generate Query</button>
+        </form>
+        <div id="fieldsContainer" style="display:none;">
+            <!-- <h3 id="fieldsHeading">Fields for </h3> -->
+            <table id="fieldsTable" border="1">
+                <thead>
+                    <tr>
+                        <th id="fieldsHeading">Field Name</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <div id="result" style="display:none;">
+        <h2>Generated Query</h2>
+        <pre id="esQuery"></pre>
+        <button id="generateGraph">Generate Graph</button>
+    </div>
+    <div id="graphResult" style="display:none;">
+        <h2>Chart</h2>
+        <div id="loader"></div>
+        <img id="chart" alt="Chart will appear here">
+        <p id="contentDescription" style="display:none; font-style: italic;"></p>
+    </div>
+
+    <script>
+        document.getElementById("queryForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const query = document.getElementById("user_query").value;
+            const response = await fetch("/generate-query/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: `user_query=${encodeURIComponent(query)}`,
+            });
+            const data = await response.json();
+
+            // Show the Elasticsearch query
+            document.getElementById("esQuery").textContent = data.elasticsearch_query;
+            document.getElementById("result").style.display = "block";
+
+            // Save the query for later graph generation
+            window.es_query = data.es_query;
+        });
+
+        document.getElementById("indexSelector").addEventListener("change", async () => {
+            const selectedIndex = document.getElementById("indexSelector").value;
+            const selectedIndexText = document.getElementById("indexSelector").options[document.getElementById("indexSelector").selectedIndex].text;
+            const fieldsContainer = document.getElementById("fieldsContainer");
+            const fieldsHeading = document.getElementById("fieldsHeading");
+            const fieldsTableBody = document.getElementById("fieldsTable").querySelector("tbody");
+
+            // Clear previous fields
+            fieldsTableBody.innerHTML = "";
+
+            try {
+                const response = await fetch("/get-index-fields/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: `selected_index=${encodeURIComponent(selectedIndex)}`,
+                });
+
+                const data = await response.json();
+
+                if (data.fields) {
+                    // Update the heading
+                    fieldsHeading.textContent = `Fields for ${selectedIndexText}`;
+                    // Populate the table with the fields
+                    data.fields.forEach((field) => {
+                        const row = document.createElement("tr");
+                        const cell = document.createElement("td");
+                        cell.textContent = field;
+                        row.appendChild(cell);
+                        fieldsTableBody.appendChild(row);
+                    });
+                    fieldsContainer.style.display = "block";
+                } else if (data.error) {
+                    alert(`Error fetching fields: ${data.error}`);
+                    fieldsContainer.style.display = "none";
+                }
+            } catch (error) {
+                alert("An error occurred while fetching fields.");
+                fieldsContainer.style.display = "none";
+            }
+        });
+
+        document.getElementById("generateGraph").addEventListener("click", async () => {
+            if (!window.es_query) return;
+
+            // Show the loader
+            const loader = document.getElementById("loader");
+            loader.style.display = "block";
+
+            const response = await fetch("/generate-graph/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: `es_query=${encodeURIComponent(JSON.stringify(window.es_query))}&user_query=${encodeURIComponent(document.getElementById("user_query").value)}`,
+            });
+
+            const data = await response.json();
+
+            // Hide the loader
+            loader.style.display = "none";
+
+            // Show the chart if available
+            if (data.chart_path) {
+                const chartElement = document.getElementById("chart");
+                //chartElement.src = data.chart_path;
+                chartElement.src = `${data.chart_path}?t=${new Date().getTime()}`;
+                document.getElementById("graphResult").style.display = "block";
+                
+                // Display the content description
+                const descriptionElement = document.getElementById("contentDescription");
+                descriptionElement.innerText = data.content_description || "No description available.";
+                descriptionElement.style.display = "block";
+            } else {
+                alert("No chart generated. Check the data.");
+            }
+        });
+    </script>
+</body>
+</html>
