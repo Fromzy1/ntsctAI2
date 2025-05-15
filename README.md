@@ -69,7 +69,8 @@ Then visit `http://localhost:5000` in your browser.
 
 ## 📊 Screenshots
 
-_Add screenshots to a `/screenshots` folder and reference them here._
+![Heatmap Example](screenshots/heatmap_example.png)
+![Timeout vs Bandwidth](screenshots/timeout_bandwidth.png)
 
 ## 🛣️ Roadmap
 
