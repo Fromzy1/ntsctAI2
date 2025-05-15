@@ -1,8 +1,3 @@
-Here’s a tailored README.md file for your application based on the Python script you shared. It’s structured to explain what the app does, how to set it up, and how to run it.
-
-⸻
-
-
 # ntsctAI2
 
 **Secure AI-powered Elasticsearch Query Generator and Visualization Tool**
@@ -91,8 +86,3 @@ query="What are the different applications served by IP 13.13.0.0"
 📞 Contact
 
 Maintainer: Fromzy
-
-⸻
-
-
-Let me know if you'd like a badge header, visual diagram, or interactive Jupyter version too.
