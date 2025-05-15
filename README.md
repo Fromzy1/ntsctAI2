@@ -69,8 +69,15 @@ Then visit `http://localhost:5000` in your browser.
 
 ## 📊 Screenshots
 
-![Heatmap Example](screenshots/heatmap_example.png)
-![Timeout vs Bandwidth](screenshots/timeout_bandwidth.png)
+<!-- Markdown-style heading -->
+## Visualization Examples
+
+<!-- HTML-style images for size control -->
+<div align="center">
+  <img src="screenshots/heatmap_example.png" width="400"/>
+  <img src="screenshots/timeout_bandwidth.png" width="400"/>
+</div>
+
 
 ## 🛣️ Roadmap
 
