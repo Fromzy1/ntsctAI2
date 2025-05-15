@@ -89,5 +89,3 @@ Then visit `http://localhost:5000` in your browser.
 
 MIT
 
-> This project is an independent prototype with no affiliation to any organization.
-
