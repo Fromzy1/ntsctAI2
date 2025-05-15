@@ -12,10 +12,14 @@ It leverages OpenAI GPT to simulate an agentic workflow: receiving high-level qu
 
 ## 🚧 Why I Built It
 
-At NETSCOUT, I’ve seen a clear opportunity to bridge traditional network observability with AI-powered assistants.  
-This project is a proof of concept aimed at internal stakeholders (Product Management) to show how fast we can build usable agents without waiting for full retraining or integration.
+Following an informal conversation with a customer who said:  
+*“It would be great if we could just ask an LLM ‘what’s going on?’ and get an answer that interprets the available data,”*  
+I decided to give it a try.
 
-It’s not a complete product — but a **thinking tool** and a **first step** towards agentic automation in security and observability contexts.
+It took me less than a week of spare-time work to build a working prototype.  
+The goal was not to build a full product, but to explore whether we could simulate useful, domain-specific reasoning on top of existing network and security telemetry.
+
+This became a thinking tool for internal discussion and a first step toward agentic automation in operational environments.
 
 ## 🔍 Sample Prompt (see `/prompt_1.txt`)
 
