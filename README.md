@@ -1,88 +1,92 @@
-# ntsctAI2
+# 🧠 LLM-driven Query Assistant for Elasticsearch
 
-**Secure AI-powered Elasticsearch Query Generator and Visualization Tool**
+This project transforms natural language questions into executable Elasticsearch queries, with automatic visualization. It's designed for real-world operational data — such as observability, security, or infrastructure metrics — and serves as a lightweight agent prototype powered by LLMs.
 
-This project uses OpenAI's language model to convert natural language questions into Elasticsearch queries, runs them on a specified index, and visualizes the results with charts.
+## 🎯 Goal
 
-## 🧠 Overview
+Help users explore large, complex datasets without needing to write code or understand the schema.  
+The system:
+- Receives a natural language question
+- Sends a structured prompt to an LLM (via OpenAI API)
+- Receives a JSON query structure
+- Executes it on Elasticsearch
+- Renders the results as charts
 
-The goal of this application is to:
-- Leverage a system prompt containing the index schema to guide query generation.
-- Allow flexible natural language querying over Elasticsearch data.
-- Automatically visualize the results based on aggregation or document data.
+## 💡 Example Queries
 
-## 📂 Project Structure
+- **Top applications by session count:**
+  > "What are the top 10 applications with the most active sessions? Graph a heat map."
 
-ntsctAI2/
-│
-├── ntsctAI.py              # Main script: handles query, ES interaction, and visualization
-├── prompt_1.txt            # System prompt template with placeholder for schema
-├── .env                    # Environment variables (e.g., OpenAI API key)
-├── OpenAIClient.py         # Wrapper for OpenAI API calls
-├── ElasticTools.py         # Helper functions for Elasticsearch queries and index inspection
-├── chart_util.py           # Utilities for chart generation based on ES results
+- **Timeouts vs bandwidth:**
+  > "What are the application name with the most time outs? Is it related to their bandwidth usage?"
 
-## ⚙️ Requirements
+## 🧱 Architecture
 
-- Python 3.8+
-- Access to:
-  - OpenAI API (via `.env`)
-  - Elasticsearch instance with your data
-- Required Python packages:
-  - `openai`
-  - `python-dotenv`
-  - `elasticsearch`
-  - `matplotlib` or `plotly` (depending on what your chart utility uses)
+```
+User (browser)
+   ↓
+[Flask App: ntsctAI.py]
+   ↳ Generates prompt
+   ↳ Sends to OpenAI
+   ↳ Parses and validates response (JSON)
+   ↳ Queries Elasticsearch (via ElasticTools)
+   ↳ Displays chart (via chart_util)
+```
 
-## 🔧 Setup
+## 🗂️ Key Files
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-repo/ntsctAI2.git
-   cd ntsctAI2
+- `ntsctAI.py`: Main logic (UI, LLM prompt, ES query, chart rendering)
+- `prompt_1.txt`, `prompt_2.txt`: Prompt templates to guide query generation
+- `ElasticTools.py`: Executes ES queries
+- `chart_util.py`: Plots results using matplotlib/seaborn
 
-	2.	Create .env file
+## 🚀 Getting Started
 
-OPENAI_ASSISTANT_ID="your_openai_assistant_id"
-ELASTICSEARCH_URL=https://elastic-server:9200
-ELASTICSEARCH_USERNAME=your_username
-ELASTICSEARCH_PASSWORD=your_elastic_password
-ELASTICSEARCH_CA_CERT=/path/to/http_ca.crt
+1. Clone the repo:
+```bash
+git clone https://github.com/Fromzy1/ntsctAI2.git
+cd ntsctAI2
+```
 
-	3.	Install dependencies
-
+2. Install dependencies:
+```bash
 pip install -r requirements.txt
+```
 
+3. Create a `.env` file:
+```
+OPENAI_API_KEY=your-key-here
+ELASTIC_HOST=http://localhost:9200
+ELASTIC_INDEX=kafka-asset
+```
 
-	4.	Edit the system prompt
-Customize prompt_1.txt if needed to tune how the LLM interprets the schema and the query.
-
-🚀 Usage
-
-Run the script:
-
+4. Run the app:
+```bash
 python ntsctAI.py
+```
 
-You’ll be prompted to confirm before launching the query. The output includes:
-	•	The generated Elasticsearch query
-	•	Matching results
-	•	A chart visualization (if applicable)
+Then visit `http://localhost:5000` in your browser.
 
-📌 Example Queries
+## 📊 Screenshots
 
-You can try replacing the query line in ntsctAI.py with examples like:
+_Add screenshots to a `/screenshots` folder and reference them here._
 
-query="What are the top 6 servers that are consuming biggest bandwidth"
-query="What are the different applications served by IP 13.13.0.0"
+## 🛣️ Roadmap
 
-🛡️ Security Notes
-	•	Do not commit your .env file with sensitive credentials.
-	•	Ensure your Elasticsearch instance is secured and access-controlled.
+- [ ] Agent-based modularization (e.g. trend agent, anomaly agent)
+- [ ] Support for open-source models (e.g. llama.cpp, Ollama)
+- [ ] Schema introspection via plugin tools (e.g. MCP)
+- [ ] Docker packaging
 
-📈 Output
-	•	If the query contains "aggs": the results are aggregated and visualized.
-	•	Otherwise: raw hit data is shown.
+## 🙋 Who is this for?
 
-📞 Contact
+- Data engineers and security analysts exploring LLM usage in observability
+- Builders of lightweight AI agents grounded in structured data
+- Anyone looking to prototype reasoning workflows on top of time-series or telemetry
 
-Maintainer: Fromzy
+## 📄 License
+
+MIT
+
+> This project is an independent prototype with no affiliation to any organization.
+
